@@ -7,16 +7,25 @@ import java.util.List;
 
 public class Games {
 	
-	List<Games> children;
+	
+	//Instance variables for each game board variation
 	int[] board;
+	Games parent;
+	List<Games> children;
+	
+	//Instance variables for finding the first zero value in each game board
+	//and the row of the firstZero value
 	int firstZero;
+	int row;
+	
+	//Instance variables for all values 1-9 and potential moves for each
+	//game board
 	List<Integer> moves = Arrays.asList(-1, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 	List<Integer> availableMoves = new ArrayList<Integer>();
-	int row;
-	Games parent;
 	
-	
-	public Games(int[] grid,  int numb) {
+	//Constructor for initial game board. Creates all children, then does a 
+	//DFS to find the complete board. 
+	public Games(int[] grid){
 		board = grid;
 		children = createAllChildren(board);
 		Games winner = findCorrectBoard();
@@ -33,12 +42,15 @@ public class Games {
 		}
 	}
 	
+	//Constructor for instances of the original game board. Creates board
+	//and assigns it a parent. Also recursively creates all children. 
 	public Games(int[] grid, Games parent) {
 		this.parent = parent;
 		board = grid;
 		children = createAllChildren(board);
 	}
 	
+	//Returns true if the board is complete.
 	public boolean isComplete() {
 		for(int i = 0; i < 81; i++) {
 			if(board[i] == 0) {
@@ -48,6 +60,7 @@ public class Games {
 		return true;
 	}
 	
+	//DFS to find the correct board.
 	public Games findCorrectBoard() {
 		Games g = this;
 		while(g != null) {
@@ -63,6 +76,7 @@ public class Games {
 		return this;
 	}
 	
+	//Method to create all children. 
 	public List<Games> createAllChildren(int[] grid){
 		findMoves();
 		List<Games> kids = new ArrayList<Games>();
@@ -77,6 +91,8 @@ public class Games {
 		return kids;
 	}
 	
+	//Method to alter the the grid so the first zero is filled in
+	//with one of the availableMoves numbers.
 	public int[] newGrid(int[] numbs, int numb) {
 		boolean first = true;
 		int[] endGoal = new int[numbs.length];
@@ -91,6 +107,8 @@ public class Games {
 		return endGoal;
 	}
 	
+	//Removes unavailable moves from total moves, then adds these numbers
+	//to available moves. 
 	public void findMoves() {
 		for(int i = 0; i < board.length; i++) {
 			if(board[i] ==0) {
@@ -109,12 +127,16 @@ public class Games {
 		}
 	}
 	
+	//Checks the row of the firstZero and removes numbers in the row
+	//from total moves.
 	public void checkRow() {
 		for(int i = row * 9; i < (row + 1) * 9; i++) {
 			moves.set(board[i], -1);
 		}
 	}
 	
+	//Checks the column of the firstZero and removes numbers in the column
+	//from total moves.
 	public void checkCol() {
 		for(int i = 0;  i < board.length; i++) {
 			if(i % 9 == firstZero % 9) {
@@ -123,6 +145,8 @@ public class Games {
 		}
 	}
 	
+	//Checks the quadrant of the firstZero and removes numbers in the quadrant
+	//from total moves.
 	public void checkQuad() {
 		int[] quadNumb;
 		if(row < 3 && (firstZero % 9 < 3)) {
@@ -150,13 +174,19 @@ public class Games {
 		}
 	}
 	
-	
+	//Main method that instantiates the Sudoku board from runtime parameters. 
+	//Prints out the winning board.
 	public static void main(String[] args) {
+		if(args.length != 81) {
+			System.out.println("Invalid Input");
+			return;
+		}
+		
 		int[] numbs = new int[81];
 		for(int i = 0; i < args.length; i++) {
 			numbs[i] = Integer.parseInt(args[i]);
 		}
-		Games game = new Games(numbs, 0);
+		Games game = new Games(numbs);
 	}
 	
 	
